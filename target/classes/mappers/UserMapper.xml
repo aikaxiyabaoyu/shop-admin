@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.shop.admin.mapper.User.IUserMapper">
+
+	<sql id="userWhere">
+		<where>
+			<if test="userName != null and userName != ''">
+				userName like concat('%',#{userName},'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				and realName like concat('%',#{realName},'%')
+			</if>
+			<if test="minDate != null">
+				and birthday >= #{minDate}
+			</if>
+			<if test="maxDate != null">
+				and birthday &lt;= #{maxDate}
+			</if>
+			<if test="shengId != null and shengId != -1">
+				and shengId = #{shengId}
+			</if>
+			<if test="shiId != null and shiId != -1">
+				and shiId = #{shiId}
+			</if>
+			<if test="xianId != null and xianId != -1">
+				and xianId = #{xianId}
+			</if>
+		</where>
+	</sql>
+
+	<!--查询总条数-->
+	<select id="queryCount" resultType="long" parameterType="com.fh.shop.admin.param.user.UserSearchParam">
+		select count(*) from t_user
+		<include refid="userWhere"></include>
+	</select>
+
+	<!--查询分页数据-->
+	<select id="queryUserList" resultType="com.fh.shop.admin.po.user.User" parameterType="com.fh.shop.admin.param.user.UserSearchParam">
+		select u.*,a1.name "shengName",a2.name "shiName",a3.name "xianName" from t_user u
+		left join t_area a1 on u.shengId = a1.id
+		left join t_area a2 on u.shiId = a2.id
+		left join t_area a3 on u.xianId = a3.id
+		<include refid="userWhere"></include>
+		order by u.userId desc
+		limit #{start},#{length}
+	</select>
+
+	<!--通过id查询单条数据-->
+	<select id="queryUserById" parameterType="long" resultType="com.fh.shop.admin.po.user.User">
+        select u.*,a1.name "shengName",a2.name "shiName",a3.name "xianName" from t_user u
+		left join t_area a1 on u.shengId = a1.id
+		left join t_area a2 on u.shiId = a2.id
+		left join t_area a3 on u.xianId = a3.id
+        where userId = #{id}
+    </select>
+
+	<!--通过name查询单条数据-->
+	<select id="queryUserByName" parameterType="string" resultType="com.fh.shop.admin.po.user.User">
+		select * from t_user where userName = #{userName}
+	</select>
+
+	<!--查询全部数据-->
+	<select id="queryUserListAll" resultType="com.fh.shop.admin.po.user.User" parameterType="com.fh.shop.admin.param.user.UserSearchParam">
+		select u.*,a1.name "shengName",a2.name "shiName",a3.name "xianName" from t_user u
+		left join t_area a1 on u.shengId = a1.id
+		left join t_area a2 on u.shiId = a2.id
+		left join t_area a3 on u.xianId = a3.id
+		<include refid="userWhere"></include>
+	</select>
+
+	<!--登录次数自增-->
+	<update id="inscLoginCount" parameterType="long">
+		update t_user set loginCount = loginCount+1 where userId = #{userId}
+	</update>
+
+	<!--登录错误次数自增-->
+	<update id="updateErrorCount">
+		update t_user set errorTime = #{date},errorCount = errorCount+1 where userId = #{userId}
+	</update>
+
+</mapper>

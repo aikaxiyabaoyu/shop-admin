@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.fh.shop.admin.mapper.log.ILogMapper">
+
+	<sql id="logWhere">
+		<where>
+			<if test="userName != null and userName != ''">
+				userName like concat('%',#{userName},'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				and realName like concat('%',#{realName},'%')
+			</if>
+			<if test="info != null and info != ''">
+				and info like concat('%',#{info},'%')
+			</if>
+			<if test="status != null">
+				and status = #{status}
+			</if>
+			<if test="minDate != null">
+				and insertTime >= #{minDate}
+			</if>
+			<if test="maxDate != null">
+				and insertTime &lt;= #{maxDate}
+			</if>
+		</where>
+	</sql>
+
+	<select id="queryCount" resultType="long" parameterType="com.fh.shop.admin.param.log.LogSearchParam">
+		select count(*) from t_log
+		<include refid="logWhere"></include>
+	</select>
+
+	<select id="queryLogList" resultType="com.fh.shop.admin.po.log.Log" parameterType="com.fh.shop.admin.param.log.LogSearchParam">
+		select t.* from
+		(select logId,userName,realName,info,insertTime,status,content,paramInfo from t_log
+		<include refid="logWhere"></include>
+		order by logId desc) t
+		limit #{start},#{length}
+	</select>
+</mapper>

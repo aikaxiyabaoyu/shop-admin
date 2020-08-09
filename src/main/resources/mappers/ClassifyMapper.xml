@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+		"-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.shop.admin.mapper.classify.IClassifyMapper">
+
+	<insert id="addClassify" parameterType="com.fh.shop.admin.po.classify.Classify">
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			select last_insert_id()
+		</selectKey>
+		insert into t_classify (name,pid) values (#{name},#{pid})
+	</insert>
+
+	<select id="queryClassifyListByPid" parameterType="long" resultType="com.fh.shop.admin.po.classify.Classify">
+		select * from t_classify where pid = #{id}
+	</select>
+
+</mapper>

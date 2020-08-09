@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.shop.admin.mapper.member.IMemberMapper">
+
+	<sql id="memberWhere">
+		<where>
+			<if test="name != null and name != ''">
+				memberName like concat('%',#{name},'%')
+			</if>
+			<if test="realName != null and realName != ''">
+				and realName like concat('%',#{realName},'%')
+			</if>
+			<if test="minDate != null">
+				and birthday >= #{minDate}
+			</if>
+			<if test="maxDate != null">
+				and birthday &lt;= #{maxDate}
+			</if>
+		</where>
+	</sql>
+
+	<select id="queryTotal" resultType="long" parameterType="com.fh.shop.admin.param.member.MemberSearchParam">
+		select count(*) from t_member
+		<include refid="memberWhere"></include>
+	</select>
+
+	<select id="queryMemberList" resultType="com.fh.shop.admin.po.member.Member" parameterType="com.fh.shop.admin.param.member.MemberSearchParam">
+		select t.* from
+		(select id,memberName,password,realName,birthday,mail,phone from t_member
+		<include refid="memberWhere"></include>
+		order by id desc) t
+		limit #{start},#{length}
+	</select>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <context:component-scan base-package="com.fh.shop.admin.controller"></context:component-scan>
+
+    <mvc:annotation-driven/>
+
+    <!--内部视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 上传文件大小上限，单位为字节（10MB） -->
+        <property name="maxUploadSize">
+            <value>10485760</value>
+        </property>
+        <!-- 请求的编码格式，必须和jSP的pageEncoding属性一致，以便正确读取表单的内容，默认为ISO-8859-1 -->
+        <property name="defaultEncoding">
+            <value>UTF-8</value>
+        </property>
+    </bean>
+
+    <!--声明日志记录的切面类-->
+    <bean id="logAspect" class="com.fh.shop.admin.aspect.LogAspect"/>
+
+    <aop:config>
+        <aop:aspect ref="logAspect">
+            <aop:pointcut id="logPointCut" expression="
+            execution(* com.fh.shop.admin.controller..*.add*(..))
+            ||execution(* com.fh.shop.admin.controller..*.del*(..))
+            ||execution(* com.fh.shop.admin.controller..*.upd*(..))
+            ||execution(* com.fh.shop.admin.controller..*.import*(..))
+            ||execution(* com.fh.shop.admin.controller..*.login(..))"/>
+            <aop:around method="doLog" pointcut-ref="logPointCut"/>
+        </aop:aspect>
+    </aop:config>
+
+
+    <!-- 声明自定义拦截器 -->
+    <mvc:interceptors>
+        <!-- 声明登录拦截器 -->
+        <mvc:interceptor>
+            <!-- 配置登录拦截器要拦截的url,/**代表拦截所有的url -->
+            <mvc:mapping path="/**" />
+            <!-- 配置哪些url不被拦截(白名单) -->
+            <mvc:exclude-mapping path="/user/login.jhtml" />
+            <!-- 声明登录拦截器类 -->
+            <bean class="com.fh.shop.admin.interceptor.LoginInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

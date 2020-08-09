@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.fh.shop.admin.mapper.product.IProductMapper">
+	<sql id="productWhere">
+		<where>
+			<if test="productName != null and productName != ''">
+				productName like concat('%',#{productName},'%')
+			</if>
+			<if test="minPrice != null">
+				and productPrice >= #{minPrice}
+			</if>
+			<if test="maxPrice != null">
+				and productPrice &lt;= #{maxPrice}
+			</if>
+			<if test="brandId != null and brandId != -1">
+			  	and t.brandId = #{brandId}
+			</if>
+			<if test="minDate != null">
+				and createDate >= #{minDate}
+			</if>
+			<if test="maxDate != null">
+				and createDate &lt;= #{maxDate}
+			</if>
+			<if test="bigId != null and bigId != -1">
+				and bigId = #{bigId}
+			</if>
+			<if test="middleId != null and middleId != -1">
+				and middleId = #{middleId}
+			</if>
+			<if test="smallId != null and smallId != -1">
+				and smallId = #{smallId}
+			</if>
+		</where>
+	</sql>
+
+	<!--查询总条数-->
+	<select id="queryCount" parameterType="com.fh.shop.admin.param.product.ProductSearchParam" resultType="long">
+		select count(*) from t_product t
+		<include refid="productWhere"></include>
+	</select>
+
+	<!--查询分页数据-->
+	<select id="queryList" parameterType="com.fh.shop.admin.param.product.ProductSearchParam" resultType="com.fh.shop.admin.po.product.Product">
+		select t.*,b.brandName,c1.name "bigName",c2.name "middleName",c3.name "smallName" from t_product t
+		left join t_brand b on t.brandId = b.brandId
+		left join t_classify c1 on t.bigId = c1.id
+		left join t_classify c2 on t.middleId = c2.id
+		left join t_classify c3 on t.smallId = c3.id
+		<include refid="productWhere"></include>
+		order by t.productId desc
+		limit #{start},#{length}
+	</select>
+
+	<!--通过id查询单条数据-->
+    <select id="queryProductById" parameterType="long" resultType="com.fh.shop.admin.po.product.Product">
+        select t.*,c1.name "bigName",c2.name "middleName",c3.name "smallName" from t_product t
+		left join t_classify c1 on t.bigId = c1.id
+		left join t_classify c2 on t.middleId = c2.id
+		left join t_classify c3 on t.smallId = c3.id
+        where productId = #{productId}
+    </select>
+
+	<!--查询全部数据-->
+	<select id="queryProductListNoPage" resultType="com.fh.shop.admin.po.product.Product" parameterType="com.fh.shop.admin.param.product.ProductSearchParam">
+		select t.*,b.brandName,c1.name "bigName",c2.name "middleName",c3.name "smallName" from t_product t
+		left join t_brand b on t.brandId = b.brandId
+		left join t_classify c1 on t.bigId = c1.id
+		left join t_classify c2 on t.middleId = c2.id
+		left join t_classify c3 on t.smallId = c3.id
+		<include refid="productWhere"></include>
+	</select>
+</mapper>
